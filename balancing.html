@@ -6,20 +6,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Node Balancing</title>
   
-  
+  <link rel="stylesheet" href="scripts/bootstrap.min.css">
   <script src="scripts/jquery.min.js"></script>
   <script src="scripts/fabric.min.js"></script>
-  
+    
   <script src="scripts/balancing.js"></script>  
   
   <style>
 	#canvas {
 		width: 100%;	
 		border: 1px solid #ddd;		
+		margin-top: 10px;
 	}
 	.canvas-container {
 		width: 100%;
 		margin: 0 auto;	
+	}
+	.form-group {
+		margin: 10px 0 0 0;
 	}
   
   </style>
@@ -27,8 +31,60 @@
 </head>
 <body>
 	
-	<canvas id="canvas"> 
-		Sorry, your browser doesn't support the &lt;canvas&gt; element.
-	</canvas>    
+	<div class="container">
+	
+		<div class="form-horizontal">
+		
+		<div class="form-group">
+			<div class="col-sm-12">
+				<button class=" btn btn-default input-sm" id="repeatBtn">Repeat</button>			
+				<button class="btn btn-default input-sm" id="randomBtn">Create random</button>		
+			</div>
+		</div>
+		<div class="form-group">		
+			<div class="col-xs-2">
+				<label for="amount">Number of nodes</label>
+				<select class="form-control input-sm" id="amount">
+					<option>5</option>
+					<option>6</option>
+					<option>7</option>
+					<option>8</option>
+					<option>9</option>
+					<option>10</option>
+					<option>11</option>
+					<option>12</option>
+					<option>13</option>
+					<option>14</option>
+					<option>15</option>
+					<option>16</option>
+					<option>17</option>
+					<option>18</option>
+					<option>19</option>
+					<option>20</option>
+				</select>
+			</div> 
+			<div class="col-xs-3">
+				<label for="inputLoad">Load values</label>
+				<input type="text" class="form-control input-sm " id="inputLoad">
+			</div>
+			<div class="col-xs-3">
+				<label for="inputOrient">Orientations</label>
+				<input type="text" class="form-control input-sm " id="inputOrient">
+			</div>
+			<div class="col-xs-1">
+				<label for="createBtn"> &nbsp </label>
+				<button class="btn btn-default input-sm" id="createBtn">Create</button>	
+			</div>
+			
+		</div>
+		
+			
+		</div>
+		</div>
+		
+		<canvas id="canvas"> 
+			Sorry, your browser doesn't support the &lt;canvas&gt; element.
+		</canvas>    
+	</div>
 	
 </body>

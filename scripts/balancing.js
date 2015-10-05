@@ -1,21 +1,21 @@
 
 //these can be modified
 var numberOfNodes = 12,
-	maxLoad = 14,
-	defLoad = false,  		//put true if want to use predefined load (will be random instead)
-	load = [9,2,2,11,6,1,3,8,4,8,6,14],  		//change predefined loads,
+	maxLoad = 15,
+	defLoad = true,  		//put true if want to use predefined load (will be random instead)
+	load = [12,2,10,8,2,13,9,11,14,6,4,5],  		//change predefined loads,
 	
-	defOrient = false, 		//put true if want to use predefined orientations
-	orientations = [1,0,0,0,0,1,0,0,0,0,0,1],
+	defOrient = true, 		//put true if want to use predefined orientations
+	orientations = [0,0,1,1,0,1,0,1,1,1,0,1],
 	
 	color1 = 'black',		
 	color2 = "#FFAD1F",
 	lineHeight = 200,	//distance between top and bottom lines
 	distance = 80,		//distance between the nodes
 	circleRadius = 25,  //node radius
-	topLine = 150,		//coordinate of the top line
+	topLine = 160,		//coordinate of the top line
 	
-	loadHeight = 5,		//height of 1 load 
+	loadHeight = 4,		//height of 1 load 
 	loadWidth = 12,		//loadBar's width
 	speed = 2;
 	
@@ -32,11 +32,50 @@ var botCon = [];
 var topLoad = [];
 var botLoad = [];
 
+function create() {
+	numberOfNodes = parseInt($("#amount").val());
+	defLoad = defOrient = true;
+	
+	load = JSON.parse("[" + $("#inputLoad").val() + "]");
+	orientations = JSON.parse("[" + $("#inputOrient").val() + "]");
+	for (var i = 0; i < load.length || i < orientations.length; i++) {
+		if (load[i] > maxLoad) load[i] = maxLoad;
+		if (orientations[i] != 0 && orientations[i] != 1) orientations[i] = 0;
+	}
+	
+	
+	createChain(numberOfNodes);
+	animStep = 0;
+}
 
-
+function random() {
+	defLoad = defOrient = false;
+	numberOfNodes = parseInt($("#amount").val());
+	createChain(numberOfNodes);
+	animStep = 0;
+}
+function displayInfo() {
+	$("#amount").val(numberOfNodes);
+	var loadStr = "", orientStr = "";
+	for (var i = 0; i < numberOfNodes; i++) {
+		loadStr = loadStr.concat(load[i] + ',');
+		orientStr = orientStr.concat(orientations[i] + ',');
+	}
+	loadStr = loadStr.substring(0, loadStr.length - 1);
+	orientStr = orientStr.substring(0, orientStr.length - 1);
+	
+	$("#inputLoad").val(loadStr);
+	$("#inputOrient").val(orientStr);
+}
 
 $(document).ready(function() {
 	
+	//initialize controls
+	$("#createBtn").click(create);
+	$("#repeatBtn").click(repeat);
+	$("#randomBtn").click(random);
+		
+		
 	//initialize canvas as a fabric object
 		canvas = new fabric.Canvas('canvas', {
 			selection: false, 
@@ -47,8 +86,9 @@ $(document).ready(function() {
 		
 	canvas.setDimensions({
 			width: $(window).width() * 0.9,
-			height: $(window).height() * 0.9
+			height: $(window).height() * 0.8
 		});
+	
 		
 	canvas.on({
 		'mouse:down': function (options) {
@@ -57,7 +97,9 @@ $(document).ready(function() {
 			}				
 		}	
 	});
-	window.addEventListener("keydown", doKeyDown, true);		
+	window.addEventListener("keydown", doKeyDown, true);	
+
+	text = new fabric.Text('click to continue', { left: 10, top: 10, fontSize: 14, fill: 'grey', selectable: false });	
 
 	createChain(numberOfNodes);	
 		
@@ -71,17 +113,16 @@ doKeyDown = function(e) {
 	}
 }
 repeat = function() {
-	canvas.clear();
 	createChain(numberOfNodes);
 	animStep = 0;
 	
 }
 
 nextStep = function() {
-	
+		
 	switch(animStep) {
 		case 0:
-			createMirrorChain(1000);
+			createMirrorChain(1000);			
 			break;
 		case 1:
 			drawCrossConnections(500);
@@ -115,11 +156,14 @@ nextStep = function() {
 			setTimeout(merge, 500, 1000);		
 			setTimeout(finalBalance, 2000, 500);
 			setTimeout(showConnections, 2000, 500); 	
+			canvas.remove(text);
 			break;
-		
+		case 8:
+			
+			return;
 	}
 	animStep++;
-	if (!animating && animStep <= 7) nextStep();
+	if (!animating && animStep <= 8) nextStep();
 }
 
 LoadUnit = function(index, node) {
@@ -132,6 +176,7 @@ LoadUnit = function(index, node) {
 			fill: 'black',
 			width: loadWidth,
 			height: loadHeight,
+			selectable: false
 	});
 	
 	canvas.add(this.shape);
@@ -331,7 +376,7 @@ drawCrossConnections = function(k) {
 
 	for (var i = 1; i <= chain.length + 1; i++) {		
 		var line = new fabric.Line(
-		[from.x, from.y, to.x, to.y], {stroke: colorTop, strokeWidth: 2, opacity: 0});
+		[from.x, from.y, to.x, to.y], {stroke: colorTop, strokeWidth: 2, opacity: 0, selectable: false});
 		canvas.add(line);
 		line.sendToBack();
 		line.animate({opacity: 1}, {duration: k});
@@ -361,7 +406,7 @@ drawCrossConnections = function(k) {
 	
 	for (var i = 1; i <= chain.length + 1; i++) {		
 		var line = new fabric.Line(
-		[from.x, from.y, to.x, to.y], {stroke: colorBot, strokeWidth: 2, opacity: 0});
+		[from.x, from.y, to.x, to.y], {stroke: colorBot, strokeWidth: 2, opacity: 0, selectable: false});
 		canvas.add(line);
 		line.sendToBack();
 		line.animate({opacity: 1}, {duration: k});
@@ -458,10 +503,9 @@ finalBalance = function() {
 					top: load.top + loadHeight + 5,
 					left: load.left - distance
 				}, {durration: (1000 / speed)});
-				
+				chain[i].load--;
+				chain[i+1].load++;
 			}
-			chain[i].load--;
-			chain[i+1].load++;
 		}
 	}, 1000 / speed)
 	
@@ -582,12 +626,24 @@ createMirrorChain = function(k){
 	
 }
 createChain = function (n) {
+
+	canvas.clear();
+	canvas.add(text);
+	distance = canvas.width / (numberOfNodes + 1.5);
+	circleRadius = Math.min(Math.max(10, distance/4), 25);
+	
+	chain = [];
+	topCon = [];
+	botCon = [];
 	
 	for (var i = 0; i < n; i++) {
 		chain[i] = new Node(i);
 		chain[i].draw();
 		
 		topLoad[i] = [];
+		
+		if (load[i] == undefined) load[i] = 0;
+		if (orientations[i] == undefined) orientations[i] = 0;
 		var k = (defLoad === true) ? load[i] : Math.floor(Math.random()*maxLoad + 1);
 		for (var j = 0; j < k; j++) {
 			topLoad[i][j] = new LoadUnit(j, chain[i]);
@@ -600,11 +656,10 @@ createChain = function (n) {
 		
 	}
 	defLoad = defOrient = true;
-	console.log("load array: ");
-	console.log(load);
-	console.log("orientation array: ");
-	console.log(orientations);
+	
+	displayInfo();
 }
+
 
 Node = function (i) {
 	
@@ -623,14 +678,16 @@ Node = function (i) {
 			top: topLine + circleRadius,
 			left: distance*(i+0.5) + circleRadius,
 			width: (distance - circleRadius*2) / 2,
-			height: 4
+			height: 4,
+			selectable: false
 		});
 
 	this.rightLine = new fabric.Rect({
 			top: topLine + circleRadius,
 			left: distance*(i+1) + circleRadius*2,
 			width: (distance - circleRadius*2) / 2,
-			height: 4
+			height: 4,
+			selectable: false
 		});
 
 	this.circle = new fabric.Circle({
